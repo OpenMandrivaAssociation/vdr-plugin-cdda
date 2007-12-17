@@ -15,7 +15,6 @@ Source:		ftp://ftp.wahnadium.org/pub/vdr-cdda/vdr-%plugin-%version.tar.bz2
 # From e-tobi repository:
 Patch1:		02_fix-cdda_menu.h.dpatch
 Patch2:		90_cdda-1.3.38.dpatch
-BuildRoot:	%{_tmppath}/%{name}-buildroot
 BuildRequires:	vdr-devel >= 1.4.1-6
 BuildRequires:	libcdio-devel
 BuildRequires:	libmad-devel

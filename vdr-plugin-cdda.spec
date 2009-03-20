@@ -2,7 +2,7 @@
 %define plugin	cdda
 %define name	vdr-plugin-%plugin
 %define version	0.1.0
-%define rel	16
+%define rel	17
 
 Summary:	VDR plugin: music cd player
 Name:		%name

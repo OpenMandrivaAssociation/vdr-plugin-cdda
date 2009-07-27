@@ -13,6 +13,7 @@ License:	GPL
 URL:		http://www.wahnadium.org
 Source:		ftp://ftp.wahnadium.org/pub/vdr-cdda/vdr-%plugin-%version.tar.bz2
 Patch0:		cdda-0.1.0-i18n-1.6.patch
+Patch4:		cdda-const-char-gcc4.4.patch
 # From e-tobi repository:
 Patch1:		02_fix-cdda_menu.h.dpatch
 Patch2:		90_cdda-1.3.38.dpatch
@@ -34,6 +35,7 @@ player.
 %patch1 -p1 -b .menu
 %patch2 -p1 -b .1338
 %patch3 -p1
+%patch4 -p1
 %vdr_plugin_prep
 
 %vdr_plugin_params_begin %plugin

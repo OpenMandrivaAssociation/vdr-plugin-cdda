@@ -1,0 +1,20 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 02_fix-cdda_menu.h.dpatch
+## http://vdrportal.de/board/thread.php?postid=429273#post429273
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fixes segfault in cdda_menu.h.
+
+@DPATCH@
+diff -Nur cdda-0.1.0.orig/cdda_menu.h cdda-0.1.0/cdda_menu.h
+--- cdda-0.1.0.orig/cdda_menu.h	2005-12-15 13:45:07.000000000 +0100
++++ cdda-0.1.0/cdda_menu.h	2006-03-03 15:19:16.000000000 +0100
+@@ -60,7 +60,7 @@
+     char *mp_newCddbServerFqdn;
+     int m_newCddbServerPort;
+     int m_newInfoView;
+-    const char *m_cddbPrioTxt[3];
++    const char *m_cddbPrioTxt[4];
+   protected:
+     void Store(void);
+   public:

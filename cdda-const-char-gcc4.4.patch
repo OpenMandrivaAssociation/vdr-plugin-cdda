@@ -1,0 +1,14 @@
+Index: cdda-0.1.0/cdda_cddb.c
+===================================================================
+--- cdda-0.1.0/cdda_cddb.c
++++ cdda-0.1.0/cdda_cddb.c	2009-07-27 17:28:33.498094091 +0300
+@@ -58,7 +58,8 @@
+ 
+     sscanf(key, "%a[^\n0-9]%d", &p_key, &track);
+ 
+-    char *p_value1 = NULL, *p_value2 = NULL, *p_idx = index(value, '/');
++    char *p_value1 = NULL, *p_value2 = NULL;
++    const char *p_idx = index(value, '/');
+     if (NULL != p_idx && 0x20 == *(p_idx-1) && 0x20 == *(p_idx+1) && 0x00 != *(p_idx+2))
+       sscanf(value, "%a[^/] / %a[^/]", &p_value1, &p_value2);
+     else

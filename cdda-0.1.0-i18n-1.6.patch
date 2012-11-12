@@ -1,0 +1,1887 @@
+
+This is a semi-automatically created i18n adaptation patch and may contain
+errors (such as missing translations). This should only be used as a
+temporary measure until the upstream plugin maintainer fixes the plugin
+properly according to the instructions in i18n-to-gettext.pl.
+
+Created for Mandriva Linux packaging by Anssi Hannula <anssi@mandriva.org>.
+
+
+Index: cdda-0.1.0/Makefile
+===================================================================
+--- cdda-0.1.0/Makefile
++++ cdda-0.1.0/Makefile	2008-04-22 17:25:26.000000000 +0300
+@@ -54,7 +54,7 @@
+ 
+ ### The object files (add further files here):
+ 
+-OBJS = gen_dynarray.o gen_dynarray_tpl.o audio_encap.o audio_buffer.o audio_decoder.o audio_playlist.o audio_player.o cdda_i18n.o cdda_conf.o cdda_menu.o cdda_device.o cdda_cddb.o $(PLUGIN).o
++OBJS = gen_dynarray.o gen_dynarray_tpl.o audio_encap.o audio_buffer.o audio_decoder.o audio_playlist.o audio_player.o  cdda_conf.o cdda_menu.o cdda_device.o cdda_cddb.o $(PLUGIN).o
+ LIBS = -lcdio
+ 
+ ### Implicit rules:
+@@ -71,9 +71,34 @@
+ 
+ -include $(DEPFILE)
+ 
++### Internationalization (I18N):
++
++PODIR     = po
++LOCALEDIR = $(VDRDIR)/locale
++I18Npo    = $(wildcard $(PODIR)/*.po)
++I18Nmsgs  = $(addprefix $(LOCALEDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
++I18Npot   = $(PODIR)/$(PLUGIN).pot
++
++%.mo: %.po
++	msgfmt -c -o $@ $<
++
++$(I18Npot): $(wildcard *.[ch] *.[ch]xx *.cc *.[ch]pp *.hh)
++	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --msgid-bugs-address='<http://qa.mandriva.com/>' -o $@ $^
++
++%.po: $(I18Npot)
++	msgmerge -U --no-wrap --no-location --backup=none -q $@ $<
++	@touch $@
++
++$(I18Nmsgs): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
++	@mkdir -p $(dir $@)
++	cp $< $@
++
++.PHONY: i18n
++i18n: $(I18Nmsgs)
++
+ ### Targets:
+ 
+-all: libvdr-$(PLUGIN).so
++all: libvdr-$(PLUGIN).so i18n
+ 
+ libvdr-$(PLUGIN).so: $(OBJS)
+ 	$(CXX) $(CXXFLAGS) -shared $(LIBS) $(OBJS) -o $@
+@@ -88,4 +113,5 @@
+ 	@echo Distribution package created as $(PACKAGE).tgz
+ 
+ clean:
++	@-rm -f $(PODIR)/*.mo $(PODIR)/*.pot
+ 	@-rm -f $(OBJS) $(DEPFILE) *.so *.tgz core* *~
+Index: cdda-0.1.0/cdda.c
+===================================================================
+--- cdda-0.1.0/cdda.c
++++ cdda-0.1.0/cdda.c	2008-04-22 17:25:26.000000000 +0300
+@@ -10,14 +10,14 @@
+ #include <getopt.h>
+ #include "audio_playlist.h"
+ #include "audio_player.h"
+-#include "cdda_i18n.h"
++
+ #include "cdda_menu.h"
+ #include "cdda_conf.h"
+ #include "cdda_device.h"
+ #include "cdda_cddb.h"
+ 
+ static const char *VERSION        = "0.1.0";
+-static const char *DESCRIPTION    = "music cd player";
++static const char *DESCRIPTION    = trNOOP("music cd player");
+ static const char *MAINMENUENTRY  = "CD Player";
+ 
+ class cPluginCdda : public cPlugin {
+@@ -95,7 +95,7 @@
+ bool cPluginCdda::Initialize(void)
+ {
+   // Initialize any background activities the plugin shall perform.
+-  RegisterI18n(tlPhrases);
++  
+   return true;
+ }
+ 
+Index: cdda-0.1.0/cdda_i18n.c
+===================================================================
+--- cdda-0.1.0/cdda_i18n.c
++++ cdda-0.1.0/cdda_i18n.c	2008-04-22 17:25:26.000000000 +0300
+@@ -1,845 +0,0 @@
+-/*
+- * cdda_i18n.c: The string translations
+- *
+- * See the README file for copyright information and how to reach the author.
+- *
+- * $Id: cdda_i18n.c,v 1.12 2005/12/19 10:37:20 cm Exp $
+- */
+-
+-#include "cdda_i18n.h"
+-
+-const tI18nPhrase tlPhrases[] = {
+-  { "CD Player",
+-    "CD Player",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Lecteur de CD",
+-    "",// TODO
+-    "CD-soitin",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "music cd player",
+-    "Musik CD Player",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Lecteur de CD Audio",
+-    "",// TODO
+-    "CD-soitin",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Mainmenu entry",
+-    "Menüeintrag",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Menu Principal",
+-    "",// TODO
+-    "Valinta päävalikossa",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "show",
+-    "anzeigen",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "voir",
+-    "",// TODO
+-    "näytä",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "hide",
+-    "verstecken",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "cacher",
+-    "",// TODO
+-    "piilota",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Refresh",
+-    "Aktualisieren",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Rafraichir",
+-    "",// TODO
+-    "Päivitä",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Eject",
+-    "Auswerfen",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Ejecter",
+-    "",// TODO
+-    "Avaa",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Artist",
+-    "Interpret",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Artiste",
+-    "",// TODO
+-    "Esittäjä",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Track",
+-    "Titel",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Piste",
+-    "",// TODO
+-    "Kappale",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Title",
+-    "Titel",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Titre",
+-    "",// TODO
+-    "Nimi",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "No music cd in your drive",
+-    "Keine Musik CD eingelegt",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Pas de CD Audio dans le lecteur",
+-    "",// TODO
+-    "Asemassa ei ole CD-levyä",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Jump to title",
+-    "Springe zu Titel",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Aller a",
+-    "",// TODO
+-    "Siirry",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "All",
+-    "Alle",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Toutes",
+-    "",// TODO
+-    "Kaikki",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Single",
+-    "",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Simple",
+-    "",// TODO
+-    "Valittu",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Skip length (s)",
+-    "Sprungweite (s)",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Longueur de saut (s)",
+-    "",// TODO
+-    "Hypyn pituus (s)",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Background",
+-    "Hintergrund",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Arrière Plan",
+-    "",// TODO
+-    "Tausta",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Skip back margin (s)",
+-    "Sprunggrenze (s)",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Marge saut arrière (s)",
+-    "",// TODO
+-    "Hyppy kappaleen alkuun (s)",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "black",
+-    "schwarz",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "noir",
+-    "",// TODO
+-    "musta",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "live",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "vidéo",
+-    "",// TODO
+-    "live-kuva",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Composer",
+-    "Komponist",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Compositeur",
+-    "",// TODO
+-    "Säveltäjä",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Songwriter",
+-    "Textdichter",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Parolier",
+-    "",// TODO
+-    "Sanoittaja",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Arranger",
+-    "Bearbeiter",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Arrangeur",
+-    "",// TODO
+-    "Tuottaja",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Genre",
+-    "",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Genre",
+-    "",// TODO
+-    "Tyylilaji",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Message",
+-    "Zusatztext",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Message",
+-    "",// TODO
+-    "Lisätiedot",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Information",
+-    "",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Information",
+-    "",// TODO
+-    "Tiedot",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Cannot eject disc while playing",
+-    "Disk kann nicht ausgeworfen werden",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Ejection du disque impossible pendant la lecture",
+-    "",// TODO
+-    "Asemaa ei voida avata soitettaessa",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Disc information",
+-    "Disk Informationen",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Information du disque",
+-    "",// TODO
+-    "Levyn tiedot",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Track information",
+-    "Titel Informationen",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Information de la piste",
+-    "",// TODO
+-    "Kappaleen tiedot",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Album",
+-    "Album",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Album",
+-    "",// TODO
+-    "Albumi",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Disc ID",
+-    "Disk ID",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "ID du disque",
+-    "",// TODO
+-    "Levyn tunniste",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Autostart replay",
+-    "Wiedergabe automatisch starten",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Lecture automatique",
+-    "",// TODO
+-    "Automaattinen toisto",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Program",
+-    "Programm",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Programme",
+-    "",// TODO
+-    "Ohjelmoidut",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Commands",
+-    "Befehle",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Commandes",
+-    "",// TODO
+-    "Komennot",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Add to playlist",
+-    "Hinzufügen zur Spielliste",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Ajouter à la liste de lecture",
+-    "",// TODO
+-    "Lisää soittolistalle",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Remove from playlist",
+-    "Entfernen von der Spielliste",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Supprimer de la liste de lecture",
+-    "",// TODO
+-    "Poista soittolistalta",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "CDDB Server FQDN",
+-    "CDDB Server FQDN",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Adresse du serveur CDDB",
+-    "",// TODO
+-    "CDDB-palvelimen osoite",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "CDDB Server Port",
+-    "CDDB Server Port",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Port du serveur CDDB",
+-    "",// TODO
+-    "CDDB-palvelimen portti",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "CDDB Priority",
+-    "CDDB Priorität",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Priorité du serveur CDDB",
+-    "",// TODO
+-    "Käytä CDDB-tietoja",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "always",
+-    "immer",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "toujours",
+-    "",// TODO
+-    "aina",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "no cd-text",
+-    "kein CD-Text",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Pas de CD-Text",
+-    "",// TODO
+-    "ei CD-tekstiä",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "off",
+-    "aus",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "éteint",
+-    "",// TODO
+-    "ei",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "on",
+-    "an",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "allumé",
+-    "",// TODO
+-    "kyllä",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "CDDB Cache",
+-    "",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Cache du serveur CDDB",
+-    "",// TODO
+-    "Käytä CDDB-välimuistia",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Loading disc information",
+-    "Lade Disk Informationen",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Chargement des informations du disque",// TODO
+-    "",// TODO
+-    "Ladataan levyn tietoja",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Information view",
+-    "Informationsansicht",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Visualisation des informations",// TODO
+-    "",// TODO
+-    "Näytä oletuksena seuraavat tiedot",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Disc",
+-    "Disk",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Levy",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Playlist",
+-    "Spielliste",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Soittolista",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "cache only",
+-    "nur Cache",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "vain välimuisti",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Next disc/track tag",
+-    "Nächstes Disk/Track-Tag",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Vaihda levyn/kappaleen tiedot",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Only one disc/track tag available",
+-    "Nur ein Disk/Track-Tag verfügbar",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Vain yhdet levyn/kappaleen tiedot saatavilla",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Delete current tag",
+-    "Aktuelles Tag löschen",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Poista nykyiset tiedot",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { "Cannot delete current tag",
+-    "Aktuelles Tag kann nicht gelöscht werden",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "Nykyisiä tietoja ei voida poistaa",
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-    "",// TODO
+-  },
+-  { NULL }
+-};
+Index: cdda-0.1.0/cdda_i18n.h
+===================================================================
+--- cdda-0.1.0/cdda_i18n.h
++++ cdda-0.1.0/cdda_i18n.h	2008-04-22 17:25:26.000000000 +0300
+@@ -1,17 +0,0 @@
+-/*
+- * cdda_i18n.h: The string translations
+- *
+- * See the README file for copyright information and how to reach the author.
+- *
+- * $Id: cdda_i18n.h,v 1.1.1.1 2005/06/27 13:30:15 cm Exp $
+- */
+-
+-
+-#ifndef __CDDAI18N_H
+-#define __CDDAI18N_H
+-
+-#include <vdr/i18n.h>
+-
+-extern const tI18nPhrase tlPhrases[];
+-
+-#endif
+Index: cdda-0.1.0/po/cdda.pot
+===================================================================
+--- cdda-0.1.0/po/cdda.pot
++++ cdda-0.1.0/po/cdda.pot	2008-04-22 17:25:26.000000000 +0300
+@@ -0,0 +1,226 @@
++# SOME DESCRIPTIVE TITLE.
++# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the PACKAGE package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++#, fuzzy
++msgid ""
++msgstr ""
++"Project-Id-Version: PACKAGE VERSION\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-22 17:25+0300\n"
++"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: LANGUAGE <LL@li.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=CHARSET\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: audio_player.c:437 audio_player.c:543
++msgid "Disc"
++msgstr ""
++
++#: audio_player.c:439 audio_player.c:545 cdda_menu.c:320
++msgid "Album"
++msgstr ""
++
++#: audio_player.c:441 audio_player.c:547 cdda_menu.c:87 cdda_menu.c:318
++#: cdda_menu.c:333
++msgid "Artist"
++msgstr ""
++
++#: audio_player.c:443 audio_player.c:549 cdda_menu.c:335
++msgid "Title"
++msgstr ""
++
++#: audio_player.c:451 audio_player.c:463 cdda_menu.c:159
++msgid "Jump to title"
++msgstr ""
++
++#: audio_player.c:504
++msgid "Playlist"
++msgstr ""
++
++#: cdda.c:20
++msgid "music cd player"
++msgstr ""
++
++#: cdda_menu.c:17
++msgid "CD Player"
++msgstr ""
++
++#: cdda_menu.c:35
++msgid "Loading disc information"
++msgstr ""
++
++#: cdda_menu.c:88 cdda_menu.c:364
++msgid "Track"
++msgstr ""
++
++#: cdda_menu.c:95 cdda_menu.c:217
++msgid "Commands"
++msgstr ""
++
++#: cdda_menu.c:96 cdda_menu.c:364
++msgid "All"
++msgstr ""
++
++#: cdda_menu.c:96
++msgid "Program"
++msgstr ""
++
++#: cdda_menu.c:96
++msgid "Single"
++msgstr ""
++
++#: cdda_menu.c:97
++msgid "Eject"
++msgstr ""
++
++#: cdda_menu.c:98 cdda_menu.c:151
++msgid "Information"
++msgstr ""
++
++#: cdda_menu.c:100
++msgid "No music cd in your drive"
++msgstr ""
++
++#: cdda_menu.c:103
++msgid "Refresh"
++msgstr ""
++
++#: cdda_menu.c:198
++msgid "Cannot eject disc while playing"
++msgstr ""
++
++#: cdda_menu.c:230
++msgid "Add to playlist"
++msgstr ""
++
++#: cdda_menu.c:232
++msgid "Remove from playlist"
++msgstr ""
++
++#: cdda_menu.c:235
++msgid "Next disc/track tag"
++msgstr ""
++
++#: cdda_menu.c:239
++msgid "Delete current tag"
++msgstr ""
++
++#: cdda_menu.c:267
++msgid "Only one disc/track tag available"
++msgstr ""
++
++#: cdda_menu.c:285
++msgid "Cannot delete current tag"
++msgstr ""
++
++#: cdda_menu.c:316
++msgid "Disc information"
++msgstr ""
++
++#: cdda_menu.c:322
++msgid "Disc ID"
++msgstr ""
++
++#: cdda_menu.c:325
++msgid "Track information"
++msgstr ""
++
++#: cdda_menu.c:327
++msgid "Arranger"
++msgstr ""
++
++#: cdda_menu.c:329
++msgid "Composer"
++msgstr ""
++
++#: cdda_menu.c:331
++msgid "Songwriter"
++msgstr ""
++
++#: cdda_menu.c:337
++msgid "Genre"
++msgstr ""
++
++#: cdda_menu.c:339
++msgid "Message"
++msgstr ""
++
++#: cdda_menu.c:358 cdda_menu.c:372
++msgid "off"
++msgstr ""
++
++#: cdda_menu.c:359
++msgid "no cd-text"
++msgstr ""
++
++#: cdda_menu.c:360
++msgid "cache only"
++msgstr ""
++
++#: cdda_menu.c:361
++msgid "always"
++msgstr ""
++
++#: cdda_menu.c:363
++msgid "Mainmenu entry"
++msgstr ""
++
++#: cdda_menu.c:363
++msgid "hide"
++msgstr ""
++
++#: cdda_menu.c:363
++msgid "show"
++msgstr ""
++
++#: cdda_menu.c:364
++msgid "Information view"
++msgstr ""
++
++#: cdda_menu.c:365
++msgid "Skip length (s)"
++msgstr ""
++
++#: cdda_menu.c:366
++msgid "Skip back margin (s)"
++msgstr ""
++
++#: cdda_menu.c:367
++msgid "Background"
++msgstr ""
++
++#: cdda_menu.c:367
++msgid "black"
++msgstr ""
++
++#: cdda_menu.c:367
++msgid "live"
++msgstr ""
++
++#: cdda_menu.c:368
++msgid "Autostart replay"
++msgstr ""
++
++#: cdda_menu.c:369
++msgid "CDDB Priority"
++msgstr ""
++
++#: cdda_menu.c:370
++msgid "CDDB Server FQDN"
++msgstr ""
++
++#: cdda_menu.c:371
++msgid "CDDB Server Port"
++msgstr ""
++
++#: cdda_menu.c:372
++msgid "CDDB Cache"
++msgstr ""
++
++#: cdda_menu.c:372
++msgid "on"
++msgstr ""
+Index: cdda-0.1.0/po/de_DE.po
+===================================================================
+--- cdda-0.1.0/po/de_DE.po
++++ cdda-0.1.0/po/de_DE.po	2008-04-22 17:25:26.000000000 +0300
+@@ -0,0 +1,225 @@
++# VDR cdda plugin language source file.
++# Copyright (C) YEAR THE VDR-cdda'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-cdda package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-cdda\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-22 17:25+0300\n"
++"PO-Revision-Date: 2008-04-22 17:25+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: audio_player.c:437 audio_player.c:543
++msgid "Disc"
++msgstr "Disk"
++
++#: audio_player.c:439 audio_player.c:545 cdda_menu.c:320
++msgid "Album"
++msgstr "Album"
++
++#: audio_player.c:441 audio_player.c:547 cdda_menu.c:87 cdda_menu.c:318
++#: cdda_menu.c:333
++msgid "Artist"
++msgstr "Interpret"
++
++#: audio_player.c:443 audio_player.c:549 cdda_menu.c:335
++msgid "Title"
++msgstr "Titel"
++
++#: audio_player.c:451 audio_player.c:463 cdda_menu.c:159
++msgid "Jump to title"
++msgstr "Springe zu Titel"
++
++#: audio_player.c:504
++msgid "Playlist"
++msgstr "Spielliste"
++
++#: cdda.c:20
++msgid "music cd player"
++msgstr "Musik CD Player"
++
++#: cdda_menu.c:17
++msgid "CD Player"
++msgstr "CD Player"
++
++#: cdda_menu.c:35
++msgid "Loading disc information"
++msgstr "Lade Disk Informationen"
++
++#: cdda_menu.c:88 cdda_menu.c:364
++msgid "Track"
++msgstr "Titel"
++
++#: cdda_menu.c:95 cdda_menu.c:217
++msgid "Commands"
++msgstr "Befehle"
++
++#: cdda_menu.c:96 cdda_menu.c:364
++msgid "All"
++msgstr "Alle"
++
++#: cdda_menu.c:96
++msgid "Program"
++msgstr "Programm"
++
++#: cdda_menu.c:96
++msgid "Single"
++msgstr ""
++
++#: cdda_menu.c:97
++msgid "Eject"
++msgstr "Auswerfen"
++
++#: cdda_menu.c:98 cdda_menu.c:151
++msgid "Information"
++msgstr ""
++
++#: cdda_menu.c:100
++msgid "No music cd in your drive"
++msgstr "Keine Musik CD eingelegt"
++
++#: cdda_menu.c:103
++msgid "Refresh"
++msgstr "Aktualisieren"
++
++#: cdda_menu.c:198
++msgid "Cannot eject disc while playing"
++msgstr "Disk kann nicht ausgeworfen werden"
++
++#: cdda_menu.c:230
++msgid "Add to playlist"
++msgstr "Hinzufügen zur Spielliste"
++
++#: cdda_menu.c:232
++msgid "Remove from playlist"
++msgstr "Entfernen von der Spielliste"
++
++#: cdda_menu.c:235
++msgid "Next disc/track tag"
++msgstr "Nächstes Disk/Track-Tag"
++
++#: cdda_menu.c:239
++msgid "Delete current tag"
++msgstr "Aktuelles Tag löschen"
++
++#: cdda_menu.c:267
++msgid "Only one disc/track tag available"
++msgstr "Nur ein Disk/Track-Tag verfügbar"
++
++#: cdda_menu.c:285
++msgid "Cannot delete current tag"
++msgstr "Aktuelles Tag kann nicht gelöscht werden"
++
++#: cdda_menu.c:316
++msgid "Disc information"
++msgstr "Disk Informationen"
++
++#: cdda_menu.c:322
++msgid "Disc ID"
++msgstr "Disk ID"
++
++#: cdda_menu.c:325
++msgid "Track information"
++msgstr "Titel Informationen"
++
++#: cdda_menu.c:327
++msgid "Arranger"
++msgstr "Bearbeiter"
++
++#: cdda_menu.c:329
++msgid "Composer"
++msgstr "Komponist"
++
++#: cdda_menu.c:331
++msgid "Songwriter"
++msgstr "Textdichter"
++
++#: cdda_menu.c:337
++msgid "Genre"
++msgstr ""
++
++#: cdda_menu.c:339
++msgid "Message"
++msgstr "Zusatztext"
++
++#: cdda_menu.c:358 cdda_menu.c:372
++msgid "off"
++msgstr "aus"
++
++#: cdda_menu.c:359
++msgid "no cd-text"
++msgstr "kein CD-Text"
++
++#: cdda_menu.c:360
++msgid "cache only"
++msgstr "nur Cache"
++
++#: cdda_menu.c:361
++msgid "always"
++msgstr "immer"
++
++#: cdda_menu.c:363
++msgid "Mainmenu entry"
++msgstr "Menüeintrag"
++
++#: cdda_menu.c:363
++msgid "hide"
++msgstr "verstecken"
++
++#: cdda_menu.c:363
++msgid "show"
++msgstr "anzeigen"
++
++#: cdda_menu.c:364
++msgid "Information view"
++msgstr "Informationsansicht"
++
++#: cdda_menu.c:365
++msgid "Skip length (s)"
++msgstr "Sprungweite (s)"
++
++#: cdda_menu.c:366
++msgid "Skip back margin (s)"
++msgstr "Sprunggrenze (s)"
++
++#: cdda_menu.c:367
++msgid "Background"
++msgstr "Hintergrund"
++
++#: cdda_menu.c:367
++msgid "black"
++msgstr "schwarz"
++
++#: cdda_menu.c:367
++msgid "live"
++msgstr ""
++
++#: cdda_menu.c:368
++msgid "Autostart replay"
++msgstr "Wiedergabe automatisch starten"
++
++#: cdda_menu.c:369
++msgid "CDDB Priority"
++msgstr "CDDB Priorität"
++
++#: cdda_menu.c:370
++msgid "CDDB Server FQDN"
++msgstr "CDDB Server FQDN"
++
++#: cdda_menu.c:371
++msgid "CDDB Server Port"
++msgstr "CDDB Server Port"
++
++#: cdda_menu.c:372
++msgid "CDDB Cache"
++msgstr ""
++
++#: cdda_menu.c:372
++msgid "on"
++msgstr "an"
+Index: cdda-0.1.0/po/fi_FI.po
+===================================================================
+--- cdda-0.1.0/po/fi_FI.po
++++ cdda-0.1.0/po/fi_FI.po	2008-04-22 17:25:26.000000000 +0300
+@@ -0,0 +1,225 @@
++# VDR cdda plugin language source file.
++# Copyright (C) YEAR THE VDR-cdda'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-cdda package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-cdda\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-22 17:25+0300\n"
++"PO-Revision-Date: 2008-04-22 17:25+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: audio_player.c:437 audio_player.c:543
++msgid "Disc"
++msgstr "Levy"
++
++#: audio_player.c:439 audio_player.c:545 cdda_menu.c:320
++msgid "Album"
++msgstr "Albumi"
++
++#: audio_player.c:441 audio_player.c:547 cdda_menu.c:87 cdda_menu.c:318
++#: cdda_menu.c:333
++msgid "Artist"
++msgstr "Esittäjä"
++
++#: audio_player.c:443 audio_player.c:549 cdda_menu.c:335
++msgid "Title"
++msgstr "Nimi"
++
++#: audio_player.c:451 audio_player.c:463 cdda_menu.c:159
++msgid "Jump to title"
++msgstr "Siirry"
++
++#: audio_player.c:504
++msgid "Playlist"
++msgstr "Soittolista"
++
++#: cdda.c:20
++msgid "music cd player"
++msgstr "CD-soitin"
++
++#: cdda_menu.c:17
++msgid "CD Player"
++msgstr "CD-soitin"
++
++#: cdda_menu.c:35
++msgid "Loading disc information"
++msgstr "Ladataan levyn tietoja"
++
++#: cdda_menu.c:88 cdda_menu.c:364
++msgid "Track"
++msgstr "Kappale"
++
++#: cdda_menu.c:95 cdda_menu.c:217
++msgid "Commands"
++msgstr "Komennot"
++
++#: cdda_menu.c:96 cdda_menu.c:364
++msgid "All"
++msgstr "Kaikki"
++
++#: cdda_menu.c:96
++msgid "Program"
++msgstr "Ohjelmoidut"
++
++#: cdda_menu.c:96
++msgid "Single"
++msgstr "Valittu"
++
++#: cdda_menu.c:97
++msgid "Eject"
++msgstr "Avaa"
++
++#: cdda_menu.c:98 cdda_menu.c:151
++msgid "Information"
++msgstr "Tiedot"
++
++#: cdda_menu.c:100
++msgid "No music cd in your drive"
++msgstr "Asemassa ei ole CD-levyä"
++
++#: cdda_menu.c:103
++msgid "Refresh"
++msgstr "Päivitä"
++
++#: cdda_menu.c:198
++msgid "Cannot eject disc while playing"
++msgstr "Asemaa ei voida avata soitettaessa"
++
++#: cdda_menu.c:230
++msgid "Add to playlist"
++msgstr "Lisää soittolistalle"
++
++#: cdda_menu.c:232
++msgid "Remove from playlist"
++msgstr "Poista soittolistalta"
++
++#: cdda_menu.c:235
++msgid "Next disc/track tag"
++msgstr "Vaihda levyn/kappaleen tiedot"
++
++#: cdda_menu.c:239
++msgid "Delete current tag"
++msgstr "Poista nykyiset tiedot"
++
++#: cdda_menu.c:267
++msgid "Only one disc/track tag available"
++msgstr "Vain yhdet levyn/kappaleen tiedot saatavilla"
++
++#: cdda_menu.c:285
++msgid "Cannot delete current tag"
++msgstr "Nykyisiä tietoja ei voida poistaa"
++
++#: cdda_menu.c:316
++msgid "Disc information"
++msgstr "Levyn tiedot"
++
++#: cdda_menu.c:322
++msgid "Disc ID"
++msgstr "Levyn tunniste"
++
++#: cdda_menu.c:325
++msgid "Track information"
++msgstr "Kappaleen tiedot"
++
++#: cdda_menu.c:327
++msgid "Arranger"
++msgstr "Tuottaja"
++
++#: cdda_menu.c:329
++msgid "Composer"
++msgstr "Säveltäjä"
++
++#: cdda_menu.c:331
++msgid "Songwriter"
++msgstr "Sanoittaja"
++
++#: cdda_menu.c:337
++msgid "Genre"
++msgstr "Tyylilaji"
++
++#: cdda_menu.c:339
++msgid "Message"
++msgstr "Lisätiedot"
++
++#: cdda_menu.c:358 cdda_menu.c:372
++msgid "off"
++msgstr "ei"
++
++#: cdda_menu.c:359
++msgid "no cd-text"
++msgstr "ei CD-tekstiä"
++
++#: cdda_menu.c:360
++msgid "cache only"
++msgstr "vain välimuisti"
++
++#: cdda_menu.c:361
++msgid "always"
++msgstr "aina"
++
++#: cdda_menu.c:363
++msgid "Mainmenu entry"
++msgstr "Valinta päävalikossa"
++
++#: cdda_menu.c:363
++msgid "hide"
++msgstr "piilota"
++
++#: cdda_menu.c:363
++msgid "show"
++msgstr "näytä"
++
++#: cdda_menu.c:364
++msgid "Information view"
++msgstr "Näytä oletuksena seuraavat tiedot"
++
++#: cdda_menu.c:365
++msgid "Skip length (s)"
++msgstr "Hypyn pituus (s)"
++
++#: cdda_menu.c:366
++msgid "Skip back margin (s)"
++msgstr "Hyppy kappaleen alkuun (s)"
++
++#: cdda_menu.c:367
++msgid "Background"
++msgstr "Tausta"
++
++#: cdda_menu.c:367
++msgid "black"
++msgstr "musta"
++
++#: cdda_menu.c:367
++msgid "live"
++msgstr "live-kuva"
++
++#: cdda_menu.c:368
++msgid "Autostart replay"
++msgstr "Automaattinen toisto"
++
++#: cdda_menu.c:369
++msgid "CDDB Priority"
++msgstr "Käytä CDDB-tietoja"
++
++#: cdda_menu.c:370
++msgid "CDDB Server FQDN"
++msgstr "CDDB-palvelimen osoite"
++
++#: cdda_menu.c:371
++msgid "CDDB Server Port"
++msgstr "CDDB-palvelimen portti"
++
++#: cdda_menu.c:372
++msgid "CDDB Cache"
++msgstr "Käytä CDDB-välimuistia"
++
++#: cdda_menu.c:372
++msgid "on"
++msgstr "kyllä"
+Index: cdda-0.1.0/po/fr_FR.po
+===================================================================
+--- cdda-0.1.0/po/fr_FR.po
++++ cdda-0.1.0/po/fr_FR.po	2008-04-22 17:25:26.000000000 +0300
+@@ -0,0 +1,225 @@
++# VDR cdda plugin language source file.
++# Copyright (C) YEAR THE VDR-cdda'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-cdda package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-cdda\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-22 17:25+0300\n"
++"PO-Revision-Date: 2008-04-22 17:25+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-1\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: audio_player.c:437 audio_player.c:543
++msgid "Disc"
++msgstr ""
++
++#: audio_player.c:439 audio_player.c:545 cdda_menu.c:320
++msgid "Album"
++msgstr "Album"
++
++#: audio_player.c:441 audio_player.c:547 cdda_menu.c:87 cdda_menu.c:318
++#: cdda_menu.c:333
++msgid "Artist"
++msgstr "Artiste"
++
++#: audio_player.c:443 audio_player.c:549 cdda_menu.c:335
++msgid "Title"
++msgstr "Titre"
++
++#: audio_player.c:451 audio_player.c:463 cdda_menu.c:159
++msgid "Jump to title"
++msgstr "Aller a"
++
++#: audio_player.c:504
++msgid "Playlist"
++msgstr ""
++
++#: cdda.c:20
++msgid "music cd player"
++msgstr "Lecteur de CD Audio"
++
++#: cdda_menu.c:17
++msgid "CD Player"
++msgstr "Lecteur de CD"
++
++#: cdda_menu.c:35
++msgid "Loading disc information"
++msgstr "Chargement des informations du disque"
++
++#: cdda_menu.c:88 cdda_menu.c:364
++msgid "Track"
++msgstr "Piste"
++
++#: cdda_menu.c:95 cdda_menu.c:217
++msgid "Commands"
++msgstr "Commandes"
++
++#: cdda_menu.c:96 cdda_menu.c:364
++msgid "All"
++msgstr "Toutes"
++
++#: cdda_menu.c:96
++msgid "Program"
++msgstr "Programme"
++
++#: cdda_menu.c:96
++msgid "Single"
++msgstr "Simple"
++
++#: cdda_menu.c:97
++msgid "Eject"
++msgstr "Ejecter"
++
++#: cdda_menu.c:98 cdda_menu.c:151
++msgid "Information"
++msgstr "Information"
++
++#: cdda_menu.c:100
++msgid "No music cd in your drive"
++msgstr "Pas de CD Audio dans le lecteur"
++
++#: cdda_menu.c:103
++msgid "Refresh"
++msgstr "Rafraichir"
++
++#: cdda_menu.c:198
++msgid "Cannot eject disc while playing"
++msgstr "Ejection du disque impossible pendant la lecture"
++
++#: cdda_menu.c:230
++msgid "Add to playlist"
++msgstr "Ajouter à la liste de lecture"
++
++#: cdda_menu.c:232
++msgid "Remove from playlist"
++msgstr "Supprimer de la liste de lecture"
++
++#: cdda_menu.c:235
++msgid "Next disc/track tag"
++msgstr ""
++
++#: cdda_menu.c:239
++msgid "Delete current tag"
++msgstr ""
++
++#: cdda_menu.c:267
++msgid "Only one disc/track tag available"
++msgstr ""
++
++#: cdda_menu.c:285
++msgid "Cannot delete current tag"
++msgstr ""
++
++#: cdda_menu.c:316
++msgid "Disc information"
++msgstr "Information du disque"
++
++#: cdda_menu.c:322
++msgid "Disc ID"
++msgstr "ID du disque"
++
++#: cdda_menu.c:325
++msgid "Track information"
++msgstr "Information de la piste"
++
++#: cdda_menu.c:327
++msgid "Arranger"
++msgstr "Arrangeur"
++
++#: cdda_menu.c:329
++msgid "Composer"
++msgstr "Compositeur"
++
++#: cdda_menu.c:331
++msgid "Songwriter"
++msgstr "Parolier"
++
++#: cdda_menu.c:337
++msgid "Genre"
++msgstr "Genre"
++
++#: cdda_menu.c:339
++msgid "Message"
++msgstr "Message"
++
++#: cdda_menu.c:358 cdda_menu.c:372
++msgid "off"
++msgstr "éteint"
++
++#: cdda_menu.c:359
++msgid "no cd-text"
++msgstr "Pas de CD-Text"
++
++#: cdda_menu.c:360
++msgid "cache only"
++msgstr ""
++
++#: cdda_menu.c:361
++msgid "always"
++msgstr "toujours"
++
++#: cdda_menu.c:363
++msgid "Mainmenu entry"
++msgstr "Menu Principal"
++
++#: cdda_menu.c:363
++msgid "hide"
++msgstr "cacher"
++
++#: cdda_menu.c:363
++msgid "show"
++msgstr "voir"
++
++#: cdda_menu.c:364
++msgid "Information view"
++msgstr "Visualisation des informations"
++
++#: cdda_menu.c:365
++msgid "Skip length (s)"
++msgstr "Longueur de saut (s)"
++
++#: cdda_menu.c:366
++msgid "Skip back margin (s)"
++msgstr "Marge saut arrière (s)"
++
++#: cdda_menu.c:367
++msgid "Background"
++msgstr "Arrière Plan"
++
++#: cdda_menu.c:367
++msgid "black"
++msgstr "noir"
++
++#: cdda_menu.c:367
++msgid "live"
++msgstr "vidéo"
++
++#: cdda_menu.c:368
++msgid "Autostart replay"
++msgstr "Lecture automatique"
++
++#: cdda_menu.c:369
++msgid "CDDB Priority"
++msgstr "Priorité du serveur CDDB"
++
++#: cdda_menu.c:370
++msgid "CDDB Server FQDN"
++msgstr "Adresse du serveur CDDB"
++
++#: cdda_menu.c:371
++msgid "CDDB Server Port"
++msgstr "Port du serveur CDDB"
++
++#: cdda_menu.c:372
++msgid "CDDB Cache"
++msgstr "Cache du serveur CDDB"
++
++#: cdda_menu.c:372
++msgid "on"
++msgstr "allumé"

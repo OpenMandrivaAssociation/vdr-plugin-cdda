@@ -10,7 +10,7 @@ Version:	%version
 Release:	%mkrel %rel
 Group:		Video
 License:	GPL
-URL:		http://www.wahnadium.org
+URL:		https://www.wahnadium.org
 Source:		ftp://ftp.wahnadium.org/pub/vdr-cdda/vdr-%plugin-%version.tar.bz2
 Patch0:		cdda-0.1.0-i18n-1.6.patch
 Patch4:		cdda-const-char-gcc4.4.patch
